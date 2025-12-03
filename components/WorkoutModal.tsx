@@ -48,12 +48,15 @@ export default function WorkoutModal({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            day_of_week: dayIndex,
+            dayOfWeek: dayIndex,
             name: workoutName || `${dayName} Workout`,
           }),
         });
 
-        if (!response.ok) throw new Error("Failed to create workout plan");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create workout plan");
+        }
         const plan = await response.json();
         setCurrentPlanId(plan.id);
 
@@ -61,7 +64,7 @@ export default function WorkoutModal({
         await addExerciseToPlan(plan.id);
       } catch (error) {
         console.error("Error creating workout plan:", error);
-        alert("Failed to create workout plan");
+        alert(error instanceof Error ? error.message : "Failed to create workout plan");
       }
     } else {
       await addExerciseToPlan(currentPlanId);
@@ -164,6 +167,53 @@ export default function WorkoutModal({
     }
   };
 
+  const handleCreateOrUpdateWorkout = async () => {
+    if (!workoutName.trim()) {
+      alert("Please enter a workout name");
+      return;
+    }
+
+    try {
+      if (existingPlan) {
+        // Update existing plan
+        const response = await fetch("/api/workout-plans", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: existingPlan.id,
+            name: workoutName,
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to update workout name");
+        setIsEditing(false);
+      } else {
+        // Create new plan
+        const response = await fetch("/api/workout-plans", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dayOfWeek: dayIndex,
+            name: workoutName,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create workout plan");
+        }
+        const plan = await response.json();
+        setCurrentPlanId(plan.id);
+        setIsEditing(false);
+        // Don't close the modal - let user add exercises
+        // Parent will refresh when modal closes naturally
+      }
+    } catch (error) {
+      console.error("Error saving workout:", error);
+      alert(error instanceof Error ? error.message : "Failed to save workout");
+    }
+  };
+
   const handleUpdateWorkoutName = async () => {
     if (!existingPlan || !workoutName.trim()) return;
 
@@ -249,27 +299,28 @@ export default function WorkoutModal({
                     onChange={(e) => setWorkoutName(e.target.value)}
                     placeholder="Workout name"
                     className="input flex-1 text-sm"
+                    onKeyPress={(e) => e.key === "Enter" && handleCreateOrUpdateWorkout()}
                   />
-                  {existingPlan && (
-                    <button
-                      onClick={handleUpdateWorkoutName}
-                      className="btn btn-primary text-xs sm:text-sm py-1.5"
-                    >
-                      Save
-                    </button>
-                  )}
+                  <button
+                    onClick={handleCreateOrUpdateWorkout}
+                    className="btn btn-primary text-xs sm:text-sm py-1.5"
+                  >
+                    {existingPlan ? "Save" : "Create"}
+                  </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <p className="text-base sm:text-lg text-primary font-medium">
-                    {workoutName}
+                    {workoutName || "Enter workout name"}
                   </p>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    Edit
-                  </button>
+                  {existingPlan && (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
               )}
             </div>
