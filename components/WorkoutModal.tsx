@@ -1,6 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { WorkoutPlan, Exercise } from "@/lib/types";
 import ExerciseItem from "./ExerciseItem";
 
@@ -214,27 +229,6 @@ export default function WorkoutModal({
     }
   };
 
-  const handleUpdateWorkoutName = async () => {
-    if (!existingPlan || !workoutName.trim()) return;
-
-    try {
-      const response = await fetch("/api/workout-plans", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: existingPlan.id,
-          name: workoutName,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update workout name");
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating workout name:", error);
-      alert("Failed to update workout name");
-    }
-  };
-
   const handleDeleteWorkout = async () => {
     if (!existingPlan) return;
 
@@ -279,6 +273,60 @@ export default function WorkoutModal({
       alert("Failed to update exercise");
     }
   };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = exercises.findIndex((ex) => ex.id === active.id);
+    const newIndex = exercises.findIndex((ex) => ex.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    // Update local state immediately for better UX
+    const newExercises = arrayMove(exercises, oldIndex, newIndex);
+    setExercises(newExercises);
+
+    // Persist to database
+    try {
+      const exerciseIds = newExercises.map((ex) => ex.id);
+      const response = await fetch("/api/exercises", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reorder: true,
+          exercise_ids: exerciseIds,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save exercise order");
+      }
+    } catch (error) {
+      console.error("Error reordering exercises:", error);
+      // Revert on error
+      setExercises(exercises);
+      alert("Failed to save exercise order");
+    }
+  };
+
+  // Configure sensors for drag and drop
+  // Add activation distance to prevent accidental drags when clicking buttons
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before activating drag
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const completionPercentage =
     totalSets > 0 ? (completedSetsCount / totalSets) * 100 : 0;
@@ -354,20 +402,32 @@ export default function WorkoutModal({
         {/* Exercise List */}
         <div className="p-3 sm:p-6 overflow-y-auto flex-1 min-h-0 bg-background/50">
           {exercises.length > 0 ? (
-            <div className="space-y-2 sm:space-y-3">
-              {exercises.map((exercise) => (
-                <ExerciseItem
-                  key={exercise.id}
-                  exercise={exercise}
-                  completedSets={completedSets.get(exercise.id) || []}
-                  onToggleSet={(setIndex: number) =>
-                    handleToggleSet(exercise.id, setIndex)
-                  }
-                  onDelete={() => handleDeleteExercise(exercise.id)}
-                  onUpdate={handleUpdateExercise}
-                />
-              ))}
-            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={exercises.map((ex) => ex.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2 sm:space-y-3">
+                  {exercises.map((exercise) => (
+                    <ExerciseItem
+                      key={exercise.id}
+                      id={exercise.id}
+                      exercise={exercise}
+                      completedSets={completedSets.get(exercise.id) || []}
+                      onToggleSet={(setIndex: number) =>
+                        handleToggleSet(exercise.id, setIndex)
+                      }
+                      onDelete={() => handleDeleteExercise(exercise.id)}
+                      onUpdate={handleUpdateExercise}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <p className="text-3xl sm:text-4xl mb-2">🏋️</p>

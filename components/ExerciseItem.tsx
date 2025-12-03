@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Exercise } from "@/lib/types";
 
 interface ExerciseItemProps {
+  id: number;
   exercise: Exercise;
   completedSets: number[];
   onToggleSet: (setIndex: number) => void;
@@ -12,12 +15,27 @@ interface ExerciseItemProps {
 }
 
 export default function ExerciseItem({
+  id,
   exercise,
   completedSets,
   onToggleSet,
   onDelete,
-  onUpdate, // Added onUpdate
+  onUpdate,
 }: ExerciseItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
   const totalSets = exercise.sets || 1;
   const allSetsCompleted = completedSets.length === totalSets;
 
@@ -42,7 +60,11 @@ export default function ExerciseItem({
 
   if (isEditing) {
     return (
-      <div className="exercise-card p-3 sm:p-4 flex flex-col gap-3 bg-muted/30 border-primary/50">
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="exercise-card p-3 sm:p-4 flex flex-col gap-3 bg-muted/30 border-primary/50"
+      >
         <input
           type="text"
           value={editName}
@@ -91,12 +113,18 @@ export default function ExerciseItem({
 
   return (
     <div
-      className={`exercise-card ${allSetsCompleted ? "done" : ""} p-3 sm:p-4`}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`exercise-card ${allSetsCompleted ? "done" : ""} p-3 sm:p-4 cursor-grab active:cursor-grabbing ${
+        isDragging ? "ring-2 ring-primary" : ""
+      }`}
     >
       <div className="flex-1">
         <div className="flex items-start justify-between mb-1.5 sm:mb-2">
           <h4
-            className={`font-medium text-sm sm:text-base exercise-name ${
+            className={`font-medium text-sm sm:text-base exercise-name flex-1 ${
               allSetsCompleted ? "line-through text-muted-foreground" : ""
             }`}
           >
@@ -104,14 +132,20 @@ export default function ExerciseItem({
           </h4>
           <div className="flex gap-1 ml-2">
             <button
-              onClick={() => setIsEditing(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
               className="text-muted-foreground hover:text-primary transition-colors p-1"
               title="Edit exercise"
             >
               ✏️
             </button>
             <button
-              onClick={onDelete}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
               className="text-muted-foreground hover:text-red-500 transition-colors p-1"
               title="Delete exercise"
             >
@@ -132,7 +166,10 @@ export default function ExerciseItem({
           {Array.from({ length: totalSets }, (_, i) => (
             <button
               key={i}
-              onClick={() => onToggleSet(i)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSet(i);
+              }}
               className={`
                 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all
                 ${
