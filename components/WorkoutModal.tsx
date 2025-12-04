@@ -18,6 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { WorkoutPlan, Exercise } from "@/lib/types";
 import ExerciseItem from "./ExerciseItem";
+import { useToast } from "./Toast";
+import { useConfirm } from "./Confirm";
 
 interface WorkoutModalProps {
   dayIndex: number;
@@ -32,6 +34,8 @@ export default function WorkoutModal({
   existingPlan,
   onClose,
 }: WorkoutModalProps) {
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [workoutName, setWorkoutName] = useState(existingPlan?.name || "");
   const [exercises, setExercises] = useState<Exercise[]>(
     existingPlan?.exercises || []
@@ -79,10 +83,11 @@ export default function WorkoutModal({
         await addExerciseToPlan(plan.id);
       } catch (error) {
         console.error("Error creating workout plan:", error);
-        alert(
+        showToast(
           error instanceof Error
             ? error.message
-            : "Failed to create workout plan"
+            : "Failed to create workout plan",
+          "error"
         );
       }
     } else {
@@ -116,11 +121,25 @@ export default function WorkoutModal({
       setNewExerciseWeight("");
     } catch (error) {
       console.error("Error adding exercise:", error);
-      alert("Failed to add exercise");
+      showToast("Failed to add exercise", "error");
     }
   };
 
   const handleDeleteExercise = async (exerciseId: number) => {
+    const exercise = exercises.find((ex) => ex.id === exerciseId);
+
+    const confirmed = await confirm({
+      title: "Delete Exercise",
+      message: `Are you sure you want to delete "${
+        exercise?.name || "this exercise"
+      }"? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+    });
+
+    if (!confirmed) return;
+
     try {
       const response = await fetch(`/api/exercises?id=${exerciseId}`, {
         method: "DELETE",
@@ -130,7 +149,7 @@ export default function WorkoutModal({
       setExercises(exercises.filter((ex) => ex.id !== exerciseId));
     } catch (error) {
       console.error("Error deleting exercise:", error);
-      alert("Failed to delete exercise");
+      showToast("Failed to delete exercise", "error");
     }
   };
 
@@ -154,12 +173,12 @@ export default function WorkoutModal({
 
   const handleCompleteWorkout = async () => {
     if (!existingPlan) {
-      alert("Please create a workout plan first");
+      showToast("Please create a workout plan first", "warning");
       return;
     }
 
     if (exercises.length === 0) {
-      alert("Add some exercises before completing the workout");
+      showToast("Add some exercises before completing the workout", "warning");
       return;
     }
 
@@ -178,7 +197,10 @@ export default function WorkoutModal({
       });
 
     if (exercisesWithCompletedSets.length === 0) {
-      alert("Please complete at least one set before saving the workout");
+      showToast(
+        "Please complete at least one set before saving the workout",
+        "warning"
+      );
       return;
     }
 
@@ -195,11 +217,11 @@ export default function WorkoutModal({
 
       if (!response.ok) throw new Error("Failed to save workout");
 
-      alert("Workout completed and saved! 🎉");
+      showToast("Workout completed and saved!", "success");
       onClose();
     } catch (error) {
       console.error("Error saving workout:", error);
-      alert("Failed to save workout");
+      showToast("Failed to save workout", "error");
     } finally {
       setIsSaving(false);
     }
@@ -207,7 +229,7 @@ export default function WorkoutModal({
 
   const handleCreateOrUpdateWorkout = async () => {
     if (!workoutName.trim()) {
-      alert("Please enter a workout name");
+      showToast("Please enter a workout name", "warning");
       return;
     }
 
@@ -248,14 +270,26 @@ export default function WorkoutModal({
       }
     } catch (error) {
       console.error("Error saving workout:", error);
-      alert(error instanceof Error ? error.message : "Failed to save workout");
+      showToast(
+        error instanceof Error ? error.message : "Failed to save workout",
+        "error"
+      );
     }
   };
 
   const handleDeleteWorkout = async () => {
     if (!existingPlan) return;
 
-    if (!confirm("Are you sure you want to delete this workout plan?")) return;
+    const confirmed = await confirm({
+      title: "Delete Workout Plan",
+      message:
+        "Are you sure you want to delete this workout plan? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+    });
+
+    if (!confirmed) return;
 
     try {
       const response = await fetch(`/api/workout-plans?id=${existingPlan.id}`, {
@@ -266,7 +300,7 @@ export default function WorkoutModal({
       onClose();
     } catch (error) {
       console.error("Error deleting workout:", error);
-      alert("Failed to delete workout");
+      showToast("Failed to delete workout", "error");
     }
   };
 
@@ -294,7 +328,7 @@ export default function WorkoutModal({
       );
     } catch (error) {
       console.error("Error updating exercise:", error);
-      alert("Failed to update exercise");
+      showToast("Failed to update exercise", "error");
     }
   };
 
@@ -335,7 +369,7 @@ export default function WorkoutModal({
       console.error("Error reordering exercises:", error);
       // Revert on error
       setExercises(exercises);
-      alert("Failed to save exercise order");
+      showToast("Failed to save exercise order", "error");
     }
   };
 
