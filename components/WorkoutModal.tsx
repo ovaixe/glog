@@ -163,14 +163,33 @@ export default function WorkoutModal({
       return;
     }
 
+    // Filter to only include exercises with completed sets
+    const exercisesWithCompletedSets = exercises
+      .filter((exercise) => {
+        const completed = completedSets.get(exercise.id);
+        return completed && completed.length > 0;
+      })
+      .map((exercise) => {
+        const completed = completedSets.get(exercise.id) || [];
+        return {
+          ...exercise,
+          sets: completed.length, // Record the actual number of sets completed
+        };
+      });
+
+    if (exercisesWithCompletedSets.length === 0) {
+      alert("Please complete at least one set before saving the workout");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const response = await fetch("/api/workout-history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          workout_plan_id: existingPlan.id,
-          exercises: exercises,
+          workoutPlanId: existingPlan.id,
+          exercisesData: exercisesWithCompletedSets,
         }),
       });
 
