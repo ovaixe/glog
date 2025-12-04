@@ -79,7 +79,11 @@ export default function WorkoutModal({
         await addExerciseToPlan(plan.id);
       } catch (error) {
         console.error("Error creating workout plan:", error);
-        alert(error instanceof Error ? error.message : "Failed to create workout plan");
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Failed to create workout plan"
+        );
       }
     } else {
       await addExerciseToPlan(currentPlanId);
@@ -253,6 +257,7 @@ export default function WorkoutModal({
     (sum, sets) => sum + sets.length,
     0
   );
+
   const handleUpdateExercise = async (updatedExercise: Exercise) => {
     try {
       const response = await fetch("/api/exercises", {
@@ -347,7 +352,9 @@ export default function WorkoutModal({
                     onChange={(e) => setWorkoutName(e.target.value)}
                     placeholder="Workout name"
                     className="input flex-1 text-sm"
-                    onKeyPress={(e) => e.key === "Enter" && handleCreateOrUpdateWorkout()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleCreateOrUpdateWorkout()
+                    }
                   />
                   <button
                     onClick={handleCreateOrUpdateWorkout}
@@ -361,23 +368,26 @@ export default function WorkoutModal({
                   <p className="text-base sm:text-lg text-primary font-medium">
                     {workoutName || "Enter workout name"}
                   </p>
-                  {existingPlan && (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      Edit
-                    </button>
-                  )}
                 </div>
               )}
             </div>
-            <button
-              onClick={onClose}
-              className="text-muted-foreground hover:text-foreground transition-colors text-xl sm:text-2xl p-2"
-            >
-              ✕
-            </button>
+
+            <div className="flex items-center gap-2">
+              {existingPlan && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  ✏️
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="text-muted-foreground hover:text-foreground transition-colors text-xl sm:text-2xl p-2"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           {/* Progress bar */}
