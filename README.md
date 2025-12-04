@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💪 GLog - Gym Workout Tracker
 
-## Getting Started
+GLog is a modern, beautiful, and offline-capable gym workout tracker built with Next.js. It helps you track your weekly workout plans, log your progress, and visualize your history.
 
-First, run the development server:
+![GLog App Icon](/public/icon-512x512.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **📋 Weekly Workout Planning**: Create and manage workout plans for each day of the week.
+- **🏋️ Exercise Tracking**: Log sets, reps, and weights for each exercise.
+- **📱 Progressive Web App (PWA)**: Installable on mobile and desktop, works offline!
+- **🔐 Secure Authentication**: Simple, secret-key based protection for your data.
+- **🎨 Beautiful UI**: Glassmorphism design, smooth animations, and dark mode.
+- **🔔 Smart Notifications**: Toast notifications for actions and errors.
+- **⚠️ Safety First**: Confirmation dialogs for critical actions like deleting workouts.
+- **📊 History Tracking**: View your past workouts and see your progress over time.
+- **🖱️ Drag & Drop**: Reorder exercises easily with drag and drop support.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
 
-## Learn More
+- Node.js 18+ installed
+- npm or yarn
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the repository**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   git clone https://github.com/ovaixe/glog.git
+   cd glog
+   ```
 
-## Deploy on Vercel
+2. **Install dependencies**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Set up Environment Variables**
+   Create a `.env` file in the root directory:
+
+   ```bash
+   # Set your secret access key (Required)
+   GLOG_SECRET_KEY=your-secure-password-here
+
+   # Database URL (Defaults to local file)
+   TURSO_DATABASE_URL=file:workout.db
+   ```
+
+4. **Run the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+5. **Open the app**
+   Visit [http://localhost:3000](http://localhost:3000) and enter your secret key to unlock.
+
+## 📱 PWA & Offline Support
+
+GLog is a fully functional PWA. You can install it on your device for a native app-like experience.
+
+- **Mobile**: Tap "Share" (iOS) or "Menu" (Android) -> "Add to Home Screen"
+- **Desktop**: Click the install icon in the address bar
+
+For more details, check the [PWA Guide](PWA_GUIDE.md).
+
+## 🔐 Authentication
+
+GLog uses a simple but secure secret-key authentication system.
+
+- No user accounts or database setup required for auth.
+- Session-based access control.
+- All routes are protected.
+
+For more details, check the [Auth Guide](AUTH_GUIDE.md).
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + Custom CSS Variables
+- **Database**: SQLite / LibSQL (via Turso client)
+- **PWA**: @ducanh2912/next-pwa
+- **Drag & Drop**: @dnd-kit
+- **Icons**: Custom generated assets

@@ -52,6 +52,14 @@ export async function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_history_completed 
       ON workout_history(completed_at DESC)
   `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME
+    )
+  `);
 }
 
 // Initialize on import (async, so we just call it and log error)
@@ -80,6 +88,33 @@ export interface WorkoutHistory {
   workout_plan_id: number;
   completed_at: string;
   exercises_data: string;
+}
+
+// Session Management
+export async function createSession(token: string): Promise<void> {
+  // Set expiration to 30 days from now
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30);
+
+  await db.execute({
+    sql: "INSERT INTO sessions (token, expires_at) VALUES (?, ?)",
+    args: [token, expiresAt.toISOString()],
+  });
+}
+
+export async function verifySession(token: string): Promise<boolean> {
+  const result = await db.execute({
+    sql: "SELECT * FROM sessions WHERE token = ? AND expires_at > datetime('now')",
+    args: [token],
+  });
+  return result.rows.length > 0;
+}
+
+export async function deleteSession(token: string): Promise<void> {
+  await db.execute({
+    sql: "DELETE FROM sessions WHERE token = ?",
+    args: [token],
+  });
 }
 
 // Workout Plan CRUD

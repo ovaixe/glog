@@ -79,7 +79,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const token = sessionStorage.getItem("glog_auth");
+    if (token) {
+      try {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
     sessionStorage.removeItem("glog_auth");
     setIsAuthenticated(false);
   };

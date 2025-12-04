@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { createSession } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
@@ -24,11 +25,11 @@ export async function POST(request: Request) {
 
     // Compare the provided key with the secret key
     if (key === SECRET_KEY) {
-      // Generate a simple token (hash of secret + timestamp)
-      const token = crypto
-        .createHash("sha256")
-        .update(SECRET_KEY + Date.now())
-        .digest("hex");
+      // Generate a secure random token
+      const token = crypto.randomBytes(32).toString("hex");
+
+      // Store token in database
+      await createSession(token);
 
       return NextResponse.json({ token, success: true });
     }

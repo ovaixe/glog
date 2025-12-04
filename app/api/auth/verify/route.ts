@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifySession } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
@@ -8,15 +9,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Token is required" }, { status: 400 });
     }
 
-    // For this simple implementation, we just check if token exists
-    // In a more complex system, you'd validate the token against a database
-    // or check its expiration time
+    // Verify token against database
+    const isValid = await verifySession(token);
 
-    // Since we're using session storage and a simple hash,
-    // we'll accept any non-empty token as valid
-    // The real security is in the initial login check
-
-    return NextResponse.json({ valid: true });
+    return NextResponse.json({ valid: isValid });
   } catch (error) {
     console.error("Verify error:", error);
     return NextResponse.json({ error: "Verification failed" }, { status: 500 });
