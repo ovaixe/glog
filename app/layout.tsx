@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ToastProvider } from "@/components/Toast";
 import { ConfirmProvider } from "@/components/Confirm";
+import { AuthProvider } from "@/components/AuthProvider";
+import AppContent from "@/components/AppContent";
 
 export const metadata: Metadata = {
   title: "GLog - Gym Workout Tracker",
@@ -39,32 +41,9 @@ export default function RootLayout({
       <body className="antialiased">
         <ToastProvider>
           <ConfirmProvider>
-            <div className="min-h-screen gradient-bg">
-              <header className="border-b border-border glass sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-4">
-                  <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-                      💪 GLog
-                    </h1>
-                    <nav className="flex gap-4">
-                      <a
-                        href="/"
-                        className="text-sm font-medium hover:text-primary transition-colors"
-                      >
-                        Workouts
-                      </a>
-                      <a
-                        href="/history"
-                        className="text-sm font-medium hover:text-primary transition-colors"
-                      >
-                        History
-                      </a>
-                    </nav>
-                  </div>
-                </div>
-              </header>
-              <main className="container mx-auto px-4 py-8">{children}</main>
-            </div>
+            <AuthProvider>
+              <AppContent>{children}</AppContent>
+            </AuthProvider>
           </ConfirmProvider>
         </ToastProvider>
       </body>
