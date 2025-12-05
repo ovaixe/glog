@@ -8,64 +8,6 @@ export const db = createClient({
   authToken,
 });
 
-// Initialize database schema
-export async function initializeDatabase() {
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS workout_plans (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      day_of_week INTEGER NOT NULL,
-      name TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(day_of_week)
-    )
-  `);
-
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS exercises (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      workout_plan_id INTEGER NOT NULL,
-      name TEXT NOT NULL,
-      sets INTEGER,
-      reps INTEGER,
-      weight REAL,
-      order_index INTEGER NOT NULL,
-      FOREIGN KEY (workout_plan_id) REFERENCES workout_plans(id) ON DELETE CASCADE
-    )
-  `);
-
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS workout_history (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      workout_plan_id INTEGER NOT NULL,
-      completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      exercises_data TEXT NOT NULL,
-      duration_seconds INTEGER,
-      FOREIGN KEY (workout_plan_id) REFERENCES workout_plans(id)
-    )
-  `);
-
-  await db.execute(`
-    CREATE INDEX IF NOT EXISTS idx_exercises_workout_plan 
-      ON exercises(workout_plan_id)
-  `);
-
-  await db.execute(`
-    CREATE INDEX IF NOT EXISTS idx_history_completed 
-      ON workout_history(completed_at DESC)
-  `);
-
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS sessions (
-      token TEXT PRIMARY KEY,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      expires_at DATETIME
-    )
-  `);
-}
-
-// Initialize on import (async, so we just call it and log error)
-initializeDatabase().catch(console.error);
-
 // Types
 export interface WorkoutPlan {
   id: number;

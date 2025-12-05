@@ -8,7 +8,7 @@ import {
   ReactNode,
   useCallback,
 } from "react";
-import { WorkoutPlan, Exercise } from "@/lib/types";
+import { WorkoutPlan } from "@/lib/types";
 import { useToast } from "./Toast";
 import { useConfirm } from "./Confirm";
 

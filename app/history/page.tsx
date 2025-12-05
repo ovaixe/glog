@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { WorkoutHistory } from "@/lib/types";
 import { format } from "date-fns";
 import { formatDuration } from "@/lib/utils";
 

@@ -77,6 +77,24 @@ GLog uses a simple but secure secret-key authentication system.
 
 For more details, check the [Auth Guide](AUTH_GUIDE.md).
 
+## 🗄️ Database Migrations
+
+GLog uses a production-ready migration system to manage database schema changes.
+
+- **Automatic**: Migrations run automatically on server startup.
+- **Tracked**: Each migration runs only once, tracked in the database.
+- **Safe**: Server exits if migration fails, preventing schema mismatches.
+
+### Quick Commands
+
+```bash
+npm run migrate          # Run all pending migrations
+npm run migrate:status   # Check migration status
+npm run migrate:rollback # Rollback last migration (dev only)
+```
+
+For detailed information on creating and managing migrations, check the [Migrations Guide](MIGRATIONS_GUIDE.md).
+
 ## 🛠️ Tech Stack
 
 - **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
