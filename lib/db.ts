@@ -39,6 +39,7 @@ export async function initializeDatabase() {
       workout_plan_id INTEGER NOT NULL,
       completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       exercises_data TEXT NOT NULL,
+      duration_seconds INTEGER,
       FOREIGN KEY (workout_plan_id) REFERENCES workout_plans(id)
     )
   `);
@@ -88,6 +89,7 @@ export interface WorkoutHistory {
   workout_plan_id: number;
   completed_at: string;
   exercises_data: string;
+  duration_seconds: number | null;
 }
 
 // Session Management
@@ -225,12 +227,17 @@ export async function reorderExercises(exerciseIds: number[]): Promise<void> {
 // Workout History
 export async function saveWorkoutHistory(
   workoutPlanId: number,
-  exercisesData: Exercise[]
+  exercisesData: Exercise[],
+  durationSeconds?: number
 ): Promise<WorkoutHistory> {
   const result = await db.execute({
-    sql: `INSERT INTO workout_history (workout_plan_id, exercises_data) 
-          VALUES (?, ?) RETURNING *`,
-    args: [workoutPlanId, JSON.stringify(exercisesData)],
+    sql: `INSERT INTO workout_history (workout_plan_id, exercises_data, duration_seconds) 
+          VALUES (?, ?, ?) RETURNING *`,
+    args: [
+      workoutPlanId,
+      JSON.stringify(exercisesData),
+      durationSeconds ?? null,
+    ],
   });
   return result.rows[0] as unknown as WorkoutHistory;
 }

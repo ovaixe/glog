@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { WorkoutHistory } from "@/lib/types";
 import { format } from "date-fns";
+import { formatDuration } from "@/lib/utils";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<any[]>([]);
@@ -108,6 +109,9 @@ export default function HistoryPage() {
                   <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <span>📅 {format(completedDate, "MMM dd, yyyy")}</span>
                     <span>🕐 {format(completedDate, "hh:mm a")}</span>
+                    {entry.duration_seconds && (
+                      <span>⏱️ {formatDuration(entry.duration_seconds)}</span>
+                    )}
                   </div>
                 </div>
                 <button className="text-xl sm:text-2xl text-muted-foreground hover:text-foreground transition-transform p-1">

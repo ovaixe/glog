@@ -22,7 +22,8 @@ export async function GET(request: Request) {
 // POST save completed workout
 export async function POST(request: Request) {
   try {
-    const { workoutPlanId, exercisesData } = await request.json();
+    const { workoutPlanId, exercisesData, durationSeconds } =
+      await request.json();
 
     if (!workoutPlanId || !exercisesData) {
       return NextResponse.json(
@@ -31,7 +32,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const history = await saveWorkoutHistory(workoutPlanId, exercisesData);
+    const history = await saveWorkoutHistory(
+      workoutPlanId,
+      exercisesData,
+      durationSeconds
+    );
     return NextResponse.json(history, { status: 201 });
   } catch (error) {
     console.error("Error saving workout history:", error);

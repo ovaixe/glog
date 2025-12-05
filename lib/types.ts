@@ -22,6 +22,7 @@ export interface WorkoutHistory {
   workout_plan_id: number;
   completed_at: string;
   exercises_data: string;
+  duration_seconds?: number | null;
   workout_name?: string;
   day_of_week?: number;
 }
