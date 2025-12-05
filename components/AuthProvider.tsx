@@ -33,8 +33,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already authenticated (from sessionStorage)
-    const authToken = sessionStorage.getItem("glog_auth");
+    // Check if user is already authenticated (from localStorage)
+    const authToken = localStorage.getItem("glog_auth");
     if (authToken) {
       // Verify the token is still valid
       verifyAuth(authToken).then((valid) => {
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (response.ok) {
         const { token } = await response.json();
-        sessionStorage.setItem("glog_auth", token);
+        localStorage.setItem("glog_auth", token);
         setIsAuthenticated(true);
         return true;
       }
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async () => {
-    const token = sessionStorage.getItem("glog_auth");
+    const token = localStorage.getItem("glog_auth");
     if (token) {
       try {
         await fetch("/api/auth/logout", {
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error("Logout error:", error);
       }
     }
-    sessionStorage.removeItem("glog_auth");
+    localStorage.removeItem("glog_auth");
     setIsAuthenticated(false);
   };
 
