@@ -49,7 +49,7 @@ export default function ActiveWorkoutModal() {
               <div className="flex items-center gap-2 mb-1">
                 <span className="animate-pulse text-primary">●</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  Workout in Progress
+                  In Progress
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold">{plan.name}</h2>
@@ -59,6 +59,7 @@ export default function ActiveWorkoutModal() {
               <div className="text-xl font-mono font-bold bg-black/30 px-3 py-1 rounded-md border border-white/10">
                 {formatDuration(elapsedSeconds)}
               </div>
+
               <button
                 onClick={() => toggleModal(false)}
                 className="btn bg-slate-800 p-2 hover:bg-slate-900 focus:outline-none focus:ring-0"
@@ -98,13 +99,13 @@ export default function ActiveWorkoutModal() {
             return (
               <div
                 key={exercise.id}
-                className={`card p-4 transition-all duration-300 ${
+                className={`p-4 transition-all duration-300 ${
                   isFullyComplete
-                    ? "bg-green-500/5 border-green-500/20"
-                    : "bg-card/50"
+                    ? "card-active bg-green-500/5"
+                    : "card"
                 }`}
               >
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex flex-col mb-3">
                   <h3
                     className={`font-bold text-lg ${
                       isFullyComplete ? "text-green-400" : ""
@@ -112,7 +113,8 @@ export default function ActiveWorkoutModal() {
                   >
                     {exercise.name}
                   </h3>
-                  <div className="text-sm text-muted-foreground text-right">
+
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div>
                       {exercise.weight ? `${exercise.weight} kg` : "BW"}
                     </div>
@@ -120,7 +122,7 @@ export default function ActiveWorkoutModal() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-4">
                   {Array.from({ length: exercise.sets || 1 }, (_, i) => {
                     const isSetComplete = exerciseCompletedSets.includes(i);
                     return (
@@ -148,7 +150,7 @@ export default function ActiveWorkoutModal() {
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 sm:p-6 border-t border-border flex gap-3 flex-shrink-0 bg-card pb-safe">
+        <div className="p-6 md:p-4 border-t border-border flex gap-3 flex-shrink-0 bg-card pb-safe">
           <button
             onClick={cancelWorkout}
             className="btn btn-ghost text-red-400 hover:text-red-300 hover:bg-red-500/10 flex-1 py-3"

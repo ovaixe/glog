@@ -461,7 +461,7 @@ export default function WorkoutModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3 sm:p-6 border-t border-border flex gap-2 sm:gap-3 flex-shrink-0 bg-card pb-safe">
+        <div className="p-6 md:p-3 border-t border-border flex gap-2 sm:gap-3 flex-shrink-0 bg-card pb-safe">
           <button
             onClick={onClose}
             className="btn btn-ghost opacity-100 hover:opacity-90 focus:outline-none flex-1 text-sm sm:text-base py-2 sm:py-2.5"

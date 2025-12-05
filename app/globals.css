@@ -38,6 +38,15 @@ html {
   transition: all 0.3s ease;
 }
 
+.card-active {
+  color: var(--color-foreground);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  transition: all 0.3s ease;
+
+}
+
 .card:hover {
   box-shadow: 0 20px 25px -5px rgb(74 158 255 / 0.1);
 }
@@ -311,23 +320,32 @@ html {
   color: var(--color-muted-fg);
 }
 
-/* Scrollbar */
+/* Scrollbar - Hidden */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 0px;
+  height: 0px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-muted);
-  border-radius: 5px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 5px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+  background: transparent;
+}
+
+/* Hide scrollbar for Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar for IE and Edge */
+* {
+  -ms-overflow-style: none;
 }
 
 /* Toast Notifications */
