@@ -3,6 +3,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/Toast";
 import { ConfirmProvider } from "@/components/Confirm";
 import { AuthProvider } from "@/components/AuthProvider";
+import { ActiveWorkoutProvider } from "@/components/ActiveWorkoutContext";
 import AppContent from "@/components/AppContent";
 
 export const metadata: Metadata = {
@@ -42,7 +43,9 @@ export default function RootLayout({
         <ToastProvider>
           <ConfirmProvider>
             <AuthProvider>
-              <AppContent>{children}</AppContent>
+              <ActiveWorkoutProvider>
+                <AppContent>{children}</AppContent>
+              </ActiveWorkoutProvider>
             </AuthProvider>
           </ConfirmProvider>
         </ToastProvider>

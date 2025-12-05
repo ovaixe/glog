@@ -58,7 +58,6 @@ html {
 }
 
 .btn:focus {
-  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -83,7 +82,7 @@ html {
 }
 
 .btn-ghost {
-  background-color: transparent;
+  background-color: var(--color-muted);
   color: var(--color-foreground);
 }
 

@@ -106,7 +106,7 @@ function ConfirmModal({ options, onConfirm, onCancel }: ConfirmModalProps) {
       onClick={onCancel}
     >
       <div
-        className="glass max-w-md w-full rounded-2xl animate-scale-in"
+        className="text-sm md:text-md glass max-w-md w-full rounded-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">

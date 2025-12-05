@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -20,6 +20,7 @@ import { WorkoutPlan, Exercise } from "@/lib/types";
 import ExerciseItem from "./ExerciseItem";
 import { useToast } from "./Toast";
 import { useConfirm } from "./Confirm";
+import { useActiveWorkout } from "./ActiveWorkoutContext";
 
 interface WorkoutModalProps {
   dayIndex: number;
@@ -36,16 +37,12 @@ export default function WorkoutModal({
 }: WorkoutModalProps) {
   const { showToast } = useToast();
   const { confirm } = useConfirm();
+  const { startWorkout } = useActiveWorkout();
   const [workoutName, setWorkoutName] = useState(existingPlan?.name || "");
   const [exercises, setExercises] = useState<Exercise[]>(
     existingPlan?.exercises || []
   );
-  // Track completed sets per exercise: Map<exerciseId, number[]>
-  const [completedSets, setCompletedSets] = useState<Map<number, number[]>>(
-    new Map()
-  );
   const [isEditing, setIsEditing] = useState(!existingPlan);
-  const [isSaving, setIsSaving] = useState(false);
   const [currentPlanId, setCurrentPlanId] = useState<number | undefined>(
     existingPlan?.id
   );
@@ -56,6 +53,14 @@ export default function WorkoutModal({
   const [newExerciseSets, setNewExerciseSets] = useState("");
   const [newExerciseReps, setNewExerciseReps] = useState("");
   const [newExerciseWeight, setNewExerciseWeight] = useState("");
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   const handleAddExercise = async () => {
     if (!newExerciseName.trim()) return;
@@ -153,80 +158,6 @@ export default function WorkoutModal({
     }
   };
 
-  const handleToggleSet = (exerciseId: number, setIndex: number) => {
-    const newCompletedSets = new Map(completedSets);
-    const exerciseSets = newCompletedSets.get(exerciseId) || [];
-
-    if (exerciseSets.includes(setIndex)) {
-      // Remove the set
-      newCompletedSets.set(
-        exerciseId,
-        exerciseSets.filter((s) => s !== setIndex)
-      );
-    } else {
-      // Add the set
-      newCompletedSets.set(exerciseId, [...exerciseSets, setIndex]);
-    }
-
-    setCompletedSets(newCompletedSets);
-  };
-
-  const handleCompleteWorkout = async () => {
-    if (!existingPlan) {
-      showToast("Please create a workout plan first", "warning");
-      return;
-    }
-
-    if (exercises.length === 0) {
-      showToast("Add some exercises before completing the workout", "warning");
-      return;
-    }
-
-    // Filter to only include exercises with completed sets
-    const exercisesWithCompletedSets = exercises
-      .filter((exercise) => {
-        const completed = completedSets.get(exercise.id);
-        return completed && completed.length > 0;
-      })
-      .map((exercise) => {
-        const completed = completedSets.get(exercise.id) || [];
-        return {
-          ...exercise,
-          sets: completed.length, // Record the actual number of sets completed
-        };
-      });
-
-    if (exercisesWithCompletedSets.length === 0) {
-      showToast(
-        "Please complete at least one set before saving the workout",
-        "warning"
-      );
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const response = await fetch("/api/workout-history", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workoutPlanId: existingPlan.id,
-          exercisesData: exercisesWithCompletedSets,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to save workout");
-
-      showToast("Workout completed and saved!", "success");
-      onClose();
-    } catch (error) {
-      console.error("Error saving workout:", error);
-      showToast("Failed to save workout", "error");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleCreateOrUpdateWorkout = async () => {
     if (!workoutName.trim()) {
       showToast("Please enter a workout name", "warning");
@@ -304,13 +235,6 @@ export default function WorkoutModal({
     }
   };
 
-  // Calculate total sets and completed sets
-  const totalSets = exercises.reduce((sum, ex) => sum + (ex.sets || 1), 0);
-  const completedSetsCount = Array.from(completedSets.values()).reduce(
-    (sum, sets) => sum + sets.length,
-    0
-  );
-
   const handleUpdateExercise = async (updatedExercise: Exercise) => {
     try {
       const response = await fetch("/api/exercises", {
@@ -386,9 +310,6 @@ export default function WorkoutModal({
     })
   );
 
-  const completionPercentage =
-    totalSets > 0 ? (completedSetsCount / totalSets) * 100 : 0;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div className="glass w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:max-w-3xl flex flex-col animate-scale-in">
@@ -428,38 +349,14 @@ export default function WorkoutModal({
             <div className="flex items-center gap-2">
               {existingPlan && (
                 <button
-                  onClick={() => setIsEditing(true)}
+                  onClick={() => setIsEditing((prev) => !prev)}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   ✏️
                 </button>
               )}
-              <button
-                onClick={onClose}
-                className="text-muted-foreground hover:text-foreground transition-colors text-xl sm:text-2xl p-2"
-              >
-                ✕
-              </button>
             </div>
           </div>
-
-          {/* Progress bar */}
-          {exercises.length > 0 && (
-            <div>
-              <div className="flex justify-between text-xs sm:text-sm mb-1.5 sm:mb-2">
-                <span className="text-muted-foreground">Progress</span>
-                <span className="font-medium">
-                  {completedSetsCount} / {totalSets} sets
-                </span>
-              </div>
-              <div className="progress-bar h-1.5 sm:h-2">
-                <div
-                  className="progress-fill"
-                  style={{ width: `${completionPercentage}%` }}
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Exercise List */}
@@ -480,10 +377,6 @@ export default function WorkoutModal({
                       key={exercise.id}
                       id={exercise.id}
                       exercise={exercise}
-                      completedSets={completedSets.get(exercise.id) || []}
-                      onToggleSet={(setIndex: number) =>
-                        handleToggleSet(exercise.id, setIndex)
-                      }
                       onDelete={() => handleDeleteExercise(exercise.id)}
                       onUpdate={handleUpdateExercise}
                     />
@@ -569,22 +462,19 @@ export default function WorkoutModal({
 
         {/* Footer Actions */}
         <div className="p-3 sm:p-6 border-t border-border flex gap-2 sm:gap-3 flex-shrink-0 bg-card pb-safe">
+          <button
+            onClick={onClose}
+            className="btn btn-ghost opacity-100 hover:opacity-90 focus:outline-none flex-1 text-sm sm:text-base py-2 sm:py-2.5"
+          >
+            Close
+          </button>
           {existingPlan && (
-            <>
-              <button
-                onClick={handleCompleteWorkout}
-                disabled={isSaving || exercises.length === 0}
-                className="btn btn-secondary flex-1 text-sm sm:text-base py-2 sm:py-2.5"
-              >
-                {isSaving ? "Saving..." : "✓ Complete"}
-              </button>
-              <button
-                onClick={handleDeleteWorkout}
-                className="btn btn-danger text-sm sm:text-base py-2 sm:py-2.5 px-3 sm:px-4"
-              >
-                🗑️
-              </button>
-            </>
+            <button
+              onClick={handleDeleteWorkout}
+              className="btn btn-danger text-sm sm:text-base py-2 sm:py-2.5 px-3 sm:px-4"
+            >
+              🗑️
+            </button>
           )}
         </div>
       </div>
