@@ -44,30 +44,31 @@ export default function ActiveWorkoutModal() {
       <div className="glass w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:max-w-3xl flex flex-col animate-scale-in border-primary/20 shadow-2xl shadow-primary/10">
         {/* Header */}
         <div className="p-4 sm:p-6 sm:rounded-t-2xl border-b border-border gradient-card flex-shrink-0">
-          <div className="flex items-start justify-between mb-4">
-            <div>
+          <div className="flex flex-col mb-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 mb-1">
                 <span className="animate-pulse text-primary">●</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   In Progress
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold">{plan.name}</h2>
-            </div>
 
-            <div className="flex items-center gap-2">
-              <div className="text-xl font-mono font-bold bg-black/30 px-3 py-1 rounded-md border border-white/10">
-                {formatDuration(elapsedSeconds)}
+              <div className="flex items-center gap-2">
+                <div className="w-30 text-center text-md md:text-xl font-bold bg-black/30 px-2 py-1 rounded-md border border-white/10">
+                  {formatDuration(elapsedSeconds)}
+                </div>
+
+                <button
+                  onClick={() => toggleModal(false)}
+                  className="rounded-md px-3 py-1 bg-slate-800 p-2 hover:bg-slate-900 focus:outline-none focus:ring-0"
+                  title="Minimize"
+                >
+                  ▼
+                </button>
               </div>
-
-              <button
-                onClick={() => toggleModal(false)}
-                className="btn bg-slate-800 p-2 hover:bg-slate-900 focus:outline-none focus:ring-0"
-                title="Minimize"
-              >
-                ▼
-              </button>
             </div>
+
+            <h2 className="text-2xl sm:text-3xl font-bold">{plan.name}</h2>
           </div>
 
           {/* Progress bar */}
@@ -100,9 +101,7 @@ export default function ActiveWorkoutModal() {
               <div
                 key={exercise.id}
                 className={`p-4 transition-all duration-300 ${
-                  isFullyComplete
-                    ? "card-active bg-green-500/5"
-                    : "card"
+                  isFullyComplete ? "card-active bg-green-500/5" : "card"
                 }`}
               >
                 <div className="flex flex-col mb-3">
@@ -115,10 +114,10 @@ export default function ActiveWorkoutModal() {
                   </h3>
 
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div>
+                    <div className="bg-black/20 px-3 py-1 rounded-lg">
                       {exercise.weight ? `${exercise.weight} kg` : "BW"}
                     </div>
-                    <div>{exercise.reps} reps</div>
+                    <div className="bg-black/20 px-3 py-1 rounded-lg">{exercise.reps} reps</div>
                   </div>
                 </div>
 

@@ -88,22 +88,28 @@ export default function HistoryPage() {
           return (
             <div
               key={entry.id}
-              className="card p-4 sm:p-6 animate-slide-up"
+              className="card p-3 md:p-6 animate-slide-up"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div
-                className="flex items-start justify-between cursor-pointer"
+                className="flex flex-col items-start justify-between cursor-pointer"
                 onClick={() => toggleExpand(entry.id)}
               >
+                <div className="flex items-center gap-2 justify-between w-full">
+                  <span className="badge badge-primary text-[10px] sm:text-xs">
+                    {exercises.length} exercise
+                    {exercises.length !== 1 ? "s" : ""}
+                  </span>
+                  <button className="text-xl sm:text-2xl text-muted-foreground hover:text-foreground transition-transform p-1">
+                    {isExpanded ? "▼" : "▶"}
+                  </button>
+                </div>
+
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                     <h3 className="text-base sm:text-lg font-semibold">
                       {entry.workout_name}
                     </h3>
-                    <span className="badge badge-primary text-[10px] sm:text-xs">
-                      {exercises.length} exercise
-                      {exercises.length !== 1 ? "s" : ""}
-                    </span>
                   </div>
                   <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <span>📅 {format(completedDate, "MMM dd, yyyy")}</span>
@@ -113,9 +119,6 @@ export default function HistoryPage() {
                     )}
                   </div>
                 </div>
-                <button className="text-xl sm:text-2xl text-muted-foreground hover:text-foreground transition-transform p-1">
-                  {isExpanded ? "▼" : "▶"}
-                </button>
               </div>
 
               {isExpanded && (
