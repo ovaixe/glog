@@ -39,13 +39,13 @@ export default function AppContent({ children }: AppContentProps) {
             <nav className="flex gap-4 items-center">
               <a
                 href="/"
-                className="text-sm font-medium hover:text-primary transition-colors"
+                className="text-sm font-medium text-sky-500 hover:text-sky-600 transition-colors"
               >
                 Workouts
               </a>
               <a
                 href="/history"
-                className="text-sm font-medium hover:text-primary transition-colors"
+                className="text-sm font-medium text-sky-500 hover:text-sky-600 transition-colors"
               >
                 History
               </a>
