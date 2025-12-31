@@ -123,9 +123,6 @@ export default function HistoryPage() {
 
               {isExpanded && (
                 <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border animate-slide-up">
-                  <h4 className="font-medium text-sm sm:text-base mb-2 sm:mb-3">
-                    Exercises:
-                  </h4>
                   <div className="space-y-2">
                     {exercises.map((exercise: any, idx: number) => (
                       <div
