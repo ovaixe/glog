@@ -6,11 +6,15 @@ import {
   deleteWorkoutPlan,
   getExercisesByWorkoutPlan,
 } from "@/lib/db";
+import { getUserFromRequest, unauthorizedResponse } from "@/lib/auth-server";
 
 // GET all workout plans with their exercises
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const plans = await getAllWorkoutPlans();
+    const user = await getUserFromRequest(request);
+    if (!user) return unauthorizedResponse();
+
+    const plans = await getAllWorkoutPlans(user.id);
 
     // Fetch exercises for each plan
     const plansWithExercises = await Promise.all(
@@ -33,6 +37,9 @@ export async function GET() {
 // POST create a new workout plan
 export async function POST(request: Request) {
   try {
+    const user = await getUserFromRequest(request);
+    if (!user) return unauthorizedResponse();
+
     const { dayOfWeek, name } = await request.json();
 
     if (dayOfWeek === undefined || !name) {
@@ -42,7 +49,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const newPlan = await createWorkoutPlan(dayOfWeek, name);
+    const newPlan = await createWorkoutPlan(user.id, dayOfWeek, name);
     return NextResponse.json(newPlan, { status: 201 });
   } catch (error) {
     console.error("Error creating workout plan:", error);
@@ -56,6 +63,9 @@ export async function POST(request: Request) {
 // PUT update a workout plan
 export async function PUT(request: Request) {
   try {
+    const user = await getUserFromRequest(request);
+    if (!user) return unauthorizedResponse();
+
     const { id, name } = await request.json();
 
     if (!id || !name) {
@@ -65,7 +75,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    await updateWorkoutPlan(id, name);
+    await updateWorkoutPlan(user.id, id, name);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error updating workout plan:", error);
@@ -79,6 +89,9 @@ export async function PUT(request: Request) {
 // DELETE a workout plan
 export async function DELETE(request: Request) {
   try {
+    const user = await getUserFromRequest(request);
+    if (!user) return unauthorizedResponse();
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -86,7 +99,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    await deleteWorkoutPlan(parseInt(id));
+    await deleteWorkoutPlan(user.id, parseInt(id));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting workout plan:", error);

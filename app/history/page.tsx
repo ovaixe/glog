@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { formatDuration } from "@/lib/utils";
+import { fetchWithAuth } from "@/lib/api";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<any[]>([]);
@@ -13,9 +14,11 @@ export default function HistoryPage() {
     fetchHistory();
   }, []);
 
+  // ...
+
   const fetchHistory = async () => {
     try {
-      const response = await fetch("/api/workout-history");
+      const response = await fetchWithAuth("/api/workout-history");
       const data = await response.json();
       setHistory(data);
     } catch (error) {

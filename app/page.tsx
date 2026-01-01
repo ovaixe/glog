@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { WorkoutPlan, DAYS_OF_WEEK } from "@/lib/types";
 import WorkoutDayCard from "@/components/WorkoutDayCard";
 import WorkoutModal from "@/components/WorkoutModal";
+import { fetchWithAuth } from "@/lib/api";
 
 export default function Home() {
   const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
@@ -15,9 +16,11 @@ export default function Home() {
     fetchWorkoutPlans();
   }, []);
 
+  // ...
+
   const fetchWorkoutPlans = async () => {
     try {
-      const response = await fetch("/api/workout-plans");
+      const response = await fetchWithAuth("/api/workout-plans");
       const data = await response.json();
       setWorkoutPlans(data);
     } catch (error) {

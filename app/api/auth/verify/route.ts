@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifySession } from "@/lib/db";
+import { getSessionUser } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
@@ -10,9 +10,16 @@ export async function POST(request: Request) {
     }
 
     // Verify token against database
-    const isValid = await verifySession(token);
+    const user = await getSessionUser(token);
 
-    return NextResponse.json({ valid: isValid });
+    if (user) {
+      return NextResponse.json({
+        valid: true,
+        user: { id: user.id, username: user.username },
+      });
+    }
+
+    return NextResponse.json({ valid: false });
   } catch (error) {
     console.error("Verify error:", error);
     return NextResponse.json({ error: "Verification failed" }, { status: 500 });

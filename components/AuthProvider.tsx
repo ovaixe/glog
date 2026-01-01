@@ -7,11 +7,21 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
+import { AuthModal } from "./AuthModal";
+
+interface User {
+  id: number;
+  username: string;
+}
 
 interface AuthContextType {
+  user: User | null;
   isAuthenticated: boolean;
-  login: (key: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
+  signup: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  openAuthModal: (mode: "login" | "signup") => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,16 +39,26 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">(
+    "login"
+  );
+
+  const pathname = usePathname();
 
   useEffect(() => {
     // Check if user is already authenticated (from localStorage)
     const authToken = localStorage.getItem("glog_auth");
     if (authToken) {
       // Verify the token is still valid
-      verifyAuth(authToken).then((valid) => {
-        setIsAuthenticated(valid);
+      verifyAuth(authToken).then((userData) => {
+        if (userData) {
+          setUser(userData);
+          setIsAuthenticated(true);
+        }
         setIsLoading(false);
       });
     } else {
@@ -46,36 +66,70 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  const verifyAuth = async (token: string): Promise<boolean> => {
+  const verifyAuth = async (token: string): Promise<User | null> => {
     try {
       const response = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
-      return response.ok;
+      const data = await response.json();
+      if (data.valid && data.user) {
+        return data.user;
+      }
+      return null;
     } catch {
-      return false;
+      return null;
     }
   };
 
-  const login = async (key: string): Promise<boolean> => {
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<boolean> => {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
-        const { token } = await response.json();
-        localStorage.setItem("glog_auth", token);
+        const data = await response.json();
+        localStorage.setItem("glog_auth", data.token);
+        setUser(data.user);
         setIsAuthenticated(true);
+        setShowAuthModal(false);
         return true;
       }
-      return false;
-    } catch {
-      return false;
+      throw new Error((await response.json()).error);
+    } catch (e: any) {
+      throw e;
+    }
+  };
+
+  const signup = async (
+    username: string,
+    password: string
+  ): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("glog_auth", data.token);
+        setUser(data.user);
+        setIsAuthenticated(true);
+        setShowAuthModal(false);
+        return true;
+      }
+      throw new Error((await response.json()).error);
+    } catch (e: any) {
+      throw e;
     }
   };
 
@@ -93,7 +147,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
     localStorage.removeItem("glog_auth");
+    setUser(null);
     setIsAuthenticated(false);
+  };
+
+  const openAuthModal = (mode: "login" | "signup") => {
+    setAuthModalMode(mode);
+    setShowAuthModal(true);
   };
 
   if (isLoading) {
@@ -107,83 +167,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
   }
 
-  if (!isAuthenticated) {
-    return <AuthModal onLogin={login} />;
+  // If not authenticated and not on landing page, show login
+  // Actually, we want to allow rendering Landing Page (/) even if not auth
+  // But other pages should be protected.
+
+  const isPublicRoute = pathname === "/";
+
+  if (!isAuthenticated && !isPublicRoute) {
+    // Force login for protected routes
+    // We can just show the modal and a background, or redirect.
+    // Let's show the modal.
+    return (
+      <AuthContext.Provider
+        value={{ user, isAuthenticated, login, signup, logout, openAuthModal }}
+      >
+        <div className="min-h-screen gradient-bg">
+          <AuthModal initialMode="login" />
+        </div>
+      </AuthContext.Provider>
+    );
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated, login, signup, logout, openAuthModal }}
+    >
       {children}
+      {showAuthModal && (
+        <AuthModal
+          initialMode={authModalMode}
+          onClose={() => setShowAuthModal(false)}
+        />
+      )}
     </AuthContext.Provider>
-  );
-}
-
-interface AuthModalProps {
-  onLogin: (key: string) => Promise<boolean>;
-}
-
-function AuthModal({ onLogin }: AuthModalProps) {
-  const [key, setKey] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    const success = await onLogin(key);
-
-    if (!success) {
-      setError("Invalid access key. Please try again.");
-      setKey("");
-    }
-
-    setIsLoading(false);
-  };
-
-  return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-      <div className="glass max-w-md w-full rounded-2xl p-8 animate-scale-in">
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🔐</div>
-          <h1 className="text-3xl font-bold gradient-primary mb-2">💪 GLog</h1>
-          <p className="text-muted-foreground">
-            Enter your access key to continue
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="password"
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-              placeholder="Enter access key"
-              className="input w-full text-center text-lg"
-              autoFocus
-              disabled={isLoading}
-            />
-            {error && (
-              <p className="text-red-500 text-sm mt-2 text-center animate-slide-up">
-                {error}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={!key || isLoading}
-            className="btn btn-primary w-full py-3 text-lg"
-          >
-            {isLoading ? "Verifying..." : "Unlock"}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-xs text-muted-foreground">
-          <p>🔒 Your data is secure and private</p>
-        </div>
-      </div>
-    </div>
   );
 }

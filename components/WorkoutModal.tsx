@@ -16,6 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { fetchWithAuth } from "@/lib/api";
 import { WorkoutPlan, Exercise } from "@/lib/types";
 import ExerciseItem from "./ExerciseItem";
 import { useToast } from "./Toast";
@@ -68,7 +69,7 @@ export default function WorkoutModal({
     if (!currentPlanId) {
       // If no plan exists, create it first
       try {
-        const response = await fetch("/api/workout-plans", {
+        const response = await fetchWithAuth("/api/workout-plans", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -102,7 +103,7 @@ export default function WorkoutModal({
 
   const addExerciseToPlan = async (planId: number) => {
     try {
-      const response = await fetch("/api/exercises", {
+      const response = await fetchWithAuth("/api/exercises", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -146,7 +147,7 @@ export default function WorkoutModal({
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/exercises?id=${exerciseId}`, {
+      const response = await fetchWithAuth(`/api/exercises?id=${exerciseId}`, {
         method: "DELETE",
       });
 
@@ -167,7 +168,7 @@ export default function WorkoutModal({
     try {
       if (existingPlan) {
         // Update existing plan
-        const response = await fetch("/api/workout-plans", {
+        const response = await fetchWithAuth("/api/workout-plans", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -180,7 +181,7 @@ export default function WorkoutModal({
         setIsEditing(false);
       } else {
         // Create new plan
-        const response = await fetch("/api/workout-plans", {
+        const response = await fetchWithAuth("/api/workout-plans", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -223,9 +224,12 @@ export default function WorkoutModal({
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/workout-plans?id=${existingPlan.id}`, {
-        method: "DELETE",
-      });
+      const response = await fetchWithAuth(
+        `/api/workout-plans?id=${existingPlan.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to delete workout");
       onClose();
@@ -237,7 +241,7 @@ export default function WorkoutModal({
 
   const handleUpdateExercise = async (updatedExercise: Exercise) => {
     try {
-      const response = await fetch("/api/exercises", {
+      const response = await fetchWithAuth("/api/exercises", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedExercise),
@@ -277,7 +281,7 @@ export default function WorkoutModal({
     // Persist to database
     try {
       const exerciseIds = newExercises.map((ex) => ex.id);
-      const response = await fetch("/api/exercises", {
+      const response = await fetchWithAuth("/api/exercises", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

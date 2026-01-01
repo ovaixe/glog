@@ -9,15 +9,16 @@ interface AppContentProps {
   children: React.ReactNode;
 }
 
+import LandingPage from "./LandingPage";
+
 export default function AppContent({ children }: AppContentProps) {
-  const { logout } = useAuth();
+  const { logout, isAuthenticated, user } = useAuth();
   const { confirm } = useConfirm();
 
   const handleLogout = async () => {
     const confirmed = await confirm({
       title: "Logout",
-      message:
-        "Are you sure you want to logout? You'll need to re-enter your access key to continue.",
+      message: "Are you sure you want to logout?",
       confirmText: "Logout",
       cancelText: "Cancel",
       type: "warning",
@@ -27,6 +28,10 @@ export default function AppContent({ children }: AppContentProps) {
       logout();
     }
   };
+
+  if (!isAuthenticated) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="min-h-screen gradient-bg">
@@ -49,13 +54,18 @@ export default function AppContent({ children }: AppContentProps) {
               >
                 History
               </a>
-              <button
-                onClick={handleLogout}
-                className="text-sm font-medium text-muted-foreground hover:text-red-500 transition-colors"
-                title="Logout"
-              >
-                🚪
-              </button>
+              <div className="flex items-center gap-2 border-l border-white/10 pl-2 sm:pl-4">
+                <span className="text-xs text-muted-foreground mr-2 hidden sm:inline-block">
+                  {user?.username}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm font-medium text-muted-foreground hover:text-red-500 transition-colors"
+                  title="Logout"
+                >
+                  🚪
+                </button>
+              </div>
             </nav>
           </div>
         </div>

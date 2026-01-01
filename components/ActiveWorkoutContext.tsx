@@ -11,6 +11,7 @@ import {
 import { WorkoutPlan } from "@/lib/types";
 import { useToast } from "./Toast";
 import { useConfirm } from "./Confirm";
+import { fetchWithAuth } from "@/lib/api";
 
 interface ActiveWorkoutState {
   plan: WorkoutPlan;
@@ -172,7 +173,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch("/api/workout-history", {
+      const response = await fetchWithAuth("/api/workout-history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,40 +1,38 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { createSession } from "@/lib/db";
+import { verifyUser, createSession } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
-    const { key } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!key) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: "Access key is required" },
+        { error: "Username and password are required" },
         { status: 400 }
       );
     }
 
-    const SECRET_KEY = process.env.GLOG_SECRET_KEY;
+    const user = await verifyUser(username, password);
 
-    if (!SECRET_KEY) {
-      console.error("GLOG_SECRET_KEY is not set in environment variables");
-      return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      );
-    }
-
-    // Compare the provided key with the secret key
-    if (key === SECRET_KEY) {
+    if (user) {
       // Generate a secure random token
       const token = crypto.randomBytes(32).toString("hex");
 
       // Store token in database
-      await createSession(token);
+      await createSession(user.id, token);
 
-      return NextResponse.json({ token, success: true });
+      return NextResponse.json({
+        token,
+        user: { id: user.id, username: user.username },
+        success: true,
+      });
     }
 
-    return NextResponse.json({ error: "Invalid access key" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid username or password" },
+      { status: 401 }
+    );
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
