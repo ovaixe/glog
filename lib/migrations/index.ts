@@ -13,6 +13,6 @@ export const allMigrations: Migration[] = [
   migration_001,
   migration_002,
   migration_003,
-  migration_004,
-  migration_005,
+  // migration_004,
+  // migration_005,
 ];
