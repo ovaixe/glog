@@ -1,5 +1,5 @@
 import { Migration } from "../migrations";
-import { db } from "../db";
+import db from "../db";
 
 /**
  * Migration Template

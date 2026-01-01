@@ -11,7 +11,7 @@
 
 import { runMigrations, rollbackLastMigration } from "../lib/migrations";
 import { allMigrations } from "../lib/migrations/index";
-import { db } from "../lib/db";
+import db from "../lib/db";
 
 async function getMigrationStatus() {
   // Create migrations table if it doesn't exist

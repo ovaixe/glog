@@ -1,5 +1,5 @@
 import { Migration } from "../migrations";
-import { db } from "../db";
+import db from "../db";
 
 /**
  * Example Migration: Add duration_seconds field to workout_history

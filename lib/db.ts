@@ -4,10 +4,12 @@ import bcrypt from "bcryptjs";
 const url = process.env.TURSO_DATABASE_URL || "file:workout.db";
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
-export const db = createClient({
+const db = createClient({
   url,
   authToken,
 });
+
+export default db;
 
 // Types
 export interface User {

@@ -1,5 +1,5 @@
 import { Migration } from "../migrations";
-import { db } from "../db";
+import db from "../db";
 
 export const migration_004: Migration = {
   version: 4,
@@ -18,7 +18,7 @@ export const migration_004: Migration = {
       });
     }
 
-    // 3. Update workout_plans
+    // Update workout_plans
     await db.execute(`
       UPDATE workout_plans
       SET user_id = 1
