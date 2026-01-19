@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "./AuthProvider";
 import { useConfirm } from "./Confirm";
 import ActiveWorkoutModal from "./ActiveWorkoutModal";
@@ -42,18 +43,18 @@ export default function AppContent({ children }: AppContentProps) {
               💪 GLog
             </h1>
             <nav className="flex gap-4 items-center">
-              <a
+              <Link
                 href="/"
                 className="text-sm font-medium text-sky-500 hover:text-sky-600 transition-colors"
               >
                 Workouts
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/history"
                 className="text-sm font-medium text-sky-500 hover:text-sky-600 transition-colors"
               >
                 History
-              </a>
+              </Link>
               <div className="flex items-center gap-2 border-l border-white/10 pl-2 sm:pl-4">
                 <span className="text-xs text-muted-foreground mr-2 hidden sm:inline-block">
                   {user?.username}

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { WorkoutPlan, DAYS_OF_WEEK } from "@/lib/types";
+import { fetchWithAuth } from "@/lib/api";
 import WorkoutDayCard from "@/components/WorkoutDayCard";
 import WorkoutModal from "@/components/WorkoutModal";
-import { fetchWithAuth } from "@/lib/api";
+import WorkoutDayLoader from "@/components/SkeltonLoaders/WorkoutDayLoader";
 
 export default function Home() {
   const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
@@ -15,8 +16,6 @@ export default function Home() {
   useEffect(() => {
     fetchWorkoutPlans();
   }, []);
-
-  // ...
 
   const fetchWorkoutPlans = async () => {
     try {
@@ -47,10 +46,20 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-muted-foreground">Loading workouts...</p>
+      <div className="animate-fade-in">
+        <div className="mb-4 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
+            Weekly Workout Plan
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Click on a day to view or create your workout plan
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {DAYS_OF_WEEK.map((day, index) => (
+            <WorkoutDayLoader key={index} day={day} dayIndex={index} />
+          ))}
         </div>
       </div>
     );
