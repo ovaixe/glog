@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { formatDuration } from "@/lib/utils";
 import { fetchWithAuth } from "@/lib/api";
+import HistoryLoader from "@/components/SkeltonLoaders/HistoryLoader";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<any[]>([]);
@@ -13,8 +14,6 @@ export default function HistoryPage() {
   useEffect(() => {
     fetchHistory();
   }, []);
-
-  // ...
 
   const fetchHistory = async () => {
     try {
@@ -34,10 +33,18 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-muted-foreground">Loading history...</p>
+      <div className="animate-fade-in">
+        <div className="mb-4 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
+            Workout History
+          </h2>
+          <p className="bg-gray-500/50 w-[60%] h-6 rounded-md animate-pulse text-sm sm:text-base text-muted-foreground"></p>
+        </div>
+
+        <div className="space-y-3 sm:space-y-4">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <HistoryLoader key={index} index={index} />
+          ))}
         </div>
       </div>
     );

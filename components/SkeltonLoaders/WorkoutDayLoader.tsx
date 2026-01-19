@@ -1,15 +1,9 @@
-import { WorkoutPlan } from "@/lib/types";
-
 interface WorkoutDayProps {
   day: string;
   dayIndex: number;
-  plan?: WorkoutPlan;
 }
 
-export default function WorkoutDayLoader({
-  day,
-  dayIndex,
-}: WorkoutDayProps) {
+export default function WorkoutDayLoader({ day, dayIndex }: WorkoutDayProps) {
   return (
     <div
       className="day-card animate-slide-up p-4 sm:p-6"
