@@ -12,7 +12,7 @@ export const migration_002: Migration = {
   async up() {
     // Add duration_seconds column to workout_history table
     await db.execute(`
-        ALTER TABLE workout_history 
+        ALTER TABLE workout_history
         ADD COLUMN duration_seconds INTEGER
       `);
 

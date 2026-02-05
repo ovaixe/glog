@@ -4,6 +4,7 @@ import { migration_002 } from "./002_add_duration_seconds_to_workout_history";
 import { migration_003 } from "./003_add_users_table";
 import { migration_004 } from "./004_update_workout_plans";
 import { migration_005 } from "./005_update_workout_history";
+import { migration_006 } from "./006_update_workout_history"
 
 /**
  * All migrations in order
@@ -15,4 +16,5 @@ export const allMigrations: Migration[] = [
   migration_003,
   migration_004,
   migration_005,
+  migration_006,
 ];

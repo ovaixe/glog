@@ -37,8 +37,8 @@ export default function WorkoutDayCard({
       </div>
 
       {hasWorkout ? (
-        <div className="flex flex-col gap-4 h-full">
-          <div className="">
+        <div className="flex flex-col gap-3 h-[80%]">
+          <div className="flex-grow">
             <p className="text-xs sm:text-sm font-medium text-primary mb-1.5 sm:mb-2">
               {plan.name}
             </p>

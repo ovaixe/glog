@@ -90,7 +90,6 @@ export async function verifyUser(
 }
 
 // Session Management
-// Session Management
 export async function createSession(
   userId: number,
   token: string
@@ -127,7 +126,6 @@ export async function deleteSession(token: string): Promise<void> {
   });
 }
 
-// Workout Plan CRUD
 // Workout Plan CRUD
 export async function getAllWorkoutPlans(
   userId: number
@@ -277,7 +275,6 @@ export async function reorderExercises(exerciseIds: number[]): Promise<void> {
   }
 }
 
-// Workout History
 // Workout History
 export async function saveWorkoutHistory(
   userId: number,
